@@ -25,6 +25,7 @@ export interface SiteConfig {
     orcid?: string;
     github?: string;
     linkedin?: string;
+    csdn?: string;
     [key: string]: string | string[] | undefined;
   };
   features: {

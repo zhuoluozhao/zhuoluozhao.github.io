@@ -27,6 +27,18 @@ const OrcidIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+// Custom CSDN icon component
+const CsdnIcon = ({ className }: { className?: string }) => (
+    <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className={className}
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.82 13.78c-.98.68-2.25 1.07-3.65 1.07-3.22 0-5.47-2.02-5.47-4.85 0-2.85 2.29-4.85 5.54-4.85 1.38 0 2.61.36 3.55 1.01l-.97 1.85c-.68-.44-1.54-.68-2.48-.68-1.92 0-3.16 1.08-3.16 2.67 0 1.6 1.24 2.68 3.16 2.68.96 0 1.85-.26 2.53-.73l.95 1.83z" />
+    </svg>
+);
+
 interface ProfileProps {
     author: SiteConfig['author'];
     social: SiteConfig['social'];
@@ -96,6 +108,11 @@ export default function Profile({ author, social, features, researchInterests }:
             name: 'GitHub',
             href: social.github,
             icon: Github,
+        }] : []),
+        ...(social.csdn ? [{
+            name: 'CSDN',
+            href: social.csdn,
+            icon: CsdnIcon,
         }] : []),
         ...(social.linkedin ? [{
             name: 'LinkedIn',
@@ -296,6 +313,7 @@ export default function Profile({ author, social, features, researchInterests }:
                             rel="noopener noreferrer"
                             className="p-2 sm:p-2 text-neutral-600 dark:text-neutral-400 hover:text-accent transition-colors duration-200"
                             aria-label={link.name}
+                            title={link.name}
                         >
                             <IconComponent className="h-5 w-5" />
                         </a>

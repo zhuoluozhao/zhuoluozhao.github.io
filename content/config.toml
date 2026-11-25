@@ -20,6 +20,7 @@ location_details = [
   "Zhejiang University, Hangzhou, China"
 ]
 github = "https://github.com/PandaAB"
+csdn = "https://blog.csdn.net/m0_62627216"
 
 [features]
 # Show a like button on the about page
