@@ -6,6 +6,7 @@ import { FileText, Github, ExternalLink } from 'lucide-react';
 import { Publication } from '@/types/publication';
 import { useMessages } from '@/lib/i18n/useMessages';
 import FormattedBibTeXText from '@/components/publications/FormattedBibTeXText';
+import PaperThumbnail from '@/components/publications/PaperThumbnail';
 
 interface SelectedPublicationsProps {
     publications: Publication[];
@@ -40,9 +41,16 @@ export default function SelectedPublications({ publications, title, enableOnePag
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: 0.1 * index }}
-                        className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg shadow-sm border border-neutral-200 dark:border-[rgba(148,163,184,0.24)] hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                        className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg shadow-sm border border-neutral-200 dark:border-[rgba(148,163,184,0.24)] hover:shadow-md transition-all duration-200"
                     >
-                        <h3 className="font-semibold text-primary mb-2 leading-tight">
+                        <div className="flex flex-col sm:flex-row gap-4 items-start">
+                            {pub.preview && (
+                                <div className="w-full sm:w-44 md:w-48 flex-shrink-0">
+                                    <PaperThumbnail src={`/papers/${pub.preview}`} alt={pub.title} />
+                                </div>
+                            )}
+                            <div className="flex-grow min-w-0">
+                                <h3 className="font-semibold text-primary mb-2 leading-tight">
                             <FormattedBibTeXText nodes={pub.titleNodes} fallback={pub.title} />
                         </h3>
                         <p className="text-sm text-neutral-600 dark:text-neutral-500 mb-1">
@@ -107,8 +115,10 @@ export default function SelectedPublications({ publications, title, enableOnePag
                                         DOI
                                     </a>
                                 )}
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </motion.div>
                 ))}
             </div>

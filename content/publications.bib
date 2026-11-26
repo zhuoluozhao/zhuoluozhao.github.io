@@ -7,6 +7,7 @@
   month = nov,
   url = {https://arxiv.org/abs/2611.07510},
   code = {https://github.com/zhenlongDai/RepoCompletion},
+  preview = {intentcoder.png},
   abstract = {The rapid development of large language models (LLMs) for code, which closely aligns with the practical needs of real-world software development, has sparked growing attention in repository-level code completion. However, existing Code LLMs present challenges in focusing on suitable contexts from the repository and in deeply reasoning about cross-file dependencies. To address these challenges, we propose a novel reinforcement learning framework for repository-level code completion. To better understand both in-file and cross-file contexts, we employ identifier-driven intent recognition to capture completion intent, thereby improving the model's performance in real-world scenarios. To enhance cross-file reasoning, we propose a reward-driven completion learning to effectively reward in complex repository completion scenarios. To guide LLMs in completing code that aligns with intended functionality and repository context, we introduce a selective-exploration strategy that directs the model to focus on low-confidence, high-reward tokens, promoting the exploration of valuable, underexplored completion patterns. Experimental results show that our approach significantly improves the performance of Code LLMs.},
   description = {Proposes IntentCoder, a reinforcement learning framework combining identifier-driven intent recognition, reward-driven completion learning, and selective-exploration strategy optimization for real-world repository-level code completion.},
   keywords = {AI for Coding, Repository-Level Code Completion, Reinforcement Learning, Code LLMs, EMNLP 2026}
@@ -23,6 +24,7 @@
   url = {https://arxiv.org/abs/2601.08545},
   doi = {10.48550/arXiv.2601.08545},
   code = {https://github.com/PandaAB/LSGen},
+  preview = {lsgen.png},
   abstract = {Traditional automated program repair (APR) focuses primarily on generating functionally correct patches while overlooking educational explanations and learner-specific guidance. We formulate Learner-Tailored Program Repair (LPR), introduce LPR-Bench, and propose LSGEN, a two-stage solution generator combining edit-driven retrieval with iterative retrieval enhancement to generate both accurate code fixes and clear explanations of underlying bug causes.},
   description = {Proposes Learner-Tailored Program Repair (LPR), the LPR-Bench benchmark, and LSGEN—a two-stage framework with edit-driven retrieval and iterative retrieval enhancement to produce both repaired code and bug explanations for programming learners.},
   keywords = {AI for Coding, Program Repair, Retrieval-Augmented Generation, Code LLMs, AAAI 2026}
@@ -37,6 +39,7 @@
   month = mar,
   url = {https://arxiv.org/abs/2503.06510},
   code = {https://github.com/zhenlongDai/AdaPatcher},
+  preview = {adapatcher.png},
   abstract = {Conventional automated program repair methods often introduce excessive edits that diverge from the original buggy code. We define Adaptive Program Repair (AdaPR) and propose AdaPatcher, a two-stage framework featuring a diff-based bug locator enhanced via self-debug learning and a program modifier trained with location-aware repair and adaptive preference learning to achieve accurate fixes with minimal structural modifications.},
   description = {Formulates Adaptive Program Repair (AdaPR) for minimal-edit bug fixing and introduces AdaPatcher, a two-stage framework combining diff-based bug localization with self-debug learning and adaptive preference learning.},
   keywords = {Automated Program Repair, Bug Localization, Preference Learning, Code LLMs, AAAI 2025 Oral}

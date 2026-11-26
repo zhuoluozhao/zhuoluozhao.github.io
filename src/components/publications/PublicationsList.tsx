@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import { FileText, Github } from 'lucide-react';
 import {
     MagnifyingGlassIcon,
@@ -17,6 +16,7 @@ import { PublicationPageConfig } from '@/types/page';
 import { cn } from '@/lib/utils';
 import { useMessages } from '@/lib/i18n/useMessages';
 import FormattedBibTeXText from './FormattedBibTeXText';
+import PaperThumbnail from './PaperThumbnail';
 
 interface PublicationsListProps {
     config: PublicationPageConfig;
@@ -202,16 +202,8 @@ export default function PublicationsList({ config, publications, embedded = fals
                         >
                             <div className="flex flex-col md:flex-row gap-6">
                                 {pub.preview && (
-                                    <div className="w-full md:w-48 flex-shrink-0">
-                                        <div className="aspect-video md:aspect-[4/3] relative rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                                            <Image
-                                                src={`/papers/${pub.preview}`}
-                                                alt={pub.title}
-                                                fill
-                                                className="object-cover"
-                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                            />
-                                        </div>
+                                    <div className="w-full md:w-56 flex-shrink-0">
+                                        <PaperThumbnail src={`/papers/${pub.preview}`} alt={pub.title} />
                                     </div>
                                 )}
                                 <div className="flex-grow">
