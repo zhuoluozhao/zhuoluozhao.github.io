@@ -25,3 +25,10 @@ export function generateSlug(text: string): string {
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+
+export function splitVenueHighlight(venue?: string): { prefix: string; highlight: string } {
+  if (!venue) return { prefix: '', highlight: '' };
+  const idx = venue.lastIndexOf('(');
+  if (idx === -1) return { prefix: venue, highlight: '' };
+  return { prefix: venue.slice(0, idx), highlight: venue.slice(idx) };
+}

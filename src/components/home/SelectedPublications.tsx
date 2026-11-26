@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FileText, Github, ExternalLink } from 'lucide-react';
 import { Publication } from '@/types/publication';
 import { useMessages } from '@/lib/i18n/useMessages';
+import { splitVenueHighlight } from '@/lib/utils';
 import FormattedBibTeXText from '@/components/publications/FormattedBibTeXText';
 import PaperThumbnail from '@/components/publications/PaperThumbnail';
 
@@ -70,9 +71,19 @@ export default function SelectedPublications({ publications, title, enableOnePag
                             ))}
                         </p>
                         <p className="text-sm text-neutral-600 dark:text-neutral-500 mb-2">
-                            {pub.journal || pub.conference} {pub.year}
+                            {(() => {
+                                const { prefix, highlight } = splitVenueHighlight(pub.journal || pub.conference);
+                                return (
+                                    <>
+                                        {prefix}
+                                        <strong className="font-semibold text-primary">
+                                            {highlight}{pub.year ? `${highlight || !prefix ? ' ' : ' '}${pub.year}` : ''}
+                                        </strong>
+                                    </>
+                                );
+                            })()}
                             {pub.authors.some((a) => a.isCoAuthor) && (
-                                <span className="ml-2 text-xs text-neutral-500">({messages.publications.equalContribution})</span>
+                                <strong className="ml-2 text-xs font-semibold text-primary">({messages.publications.equalContribution})</strong>
                             )}
                         </p>
                         {pub.description && (

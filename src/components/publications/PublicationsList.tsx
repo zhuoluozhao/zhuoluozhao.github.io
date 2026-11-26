@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Publication } from '@/types/publication';
 import { PublicationPageConfig } from '@/types/page';
-import { cn } from '@/lib/utils';
+import { cn, splitVenueHighlight } from '@/lib/utils';
 import { useMessages } from '@/lib/i18n/useMessages';
 import FormattedBibTeXText from './FormattedBibTeXText';
 import PaperThumbnail from './PaperThumbnail';
@@ -226,10 +226,20 @@ export default function PublicationsList({ config, publications, embedded = fals
                                             </span>
                                         ))}
                                     </p>
-                                    <p className="text-sm font-medium text-neutral-800 dark:text-neutral-600 mb-3">
-                                        {pub.journal || pub.conference} {pub.year}
+                                    <p className="text-sm text-neutral-600 dark:text-neutral-500 mb-3">
+                                        {(() => {
+                                            const { prefix, highlight } = splitVenueHighlight(pub.journal || pub.conference);
+                                            return (
+                                                <>
+                                                    {prefix}
+                                                    <strong className="font-semibold text-primary">
+                                                        {highlight}{pub.year ? ` ${pub.year}` : ''}
+                                                    </strong>
+                                                </>
+                                            );
+                                        })()}
                                         {pub.authors.some((a) => a.isCoAuthor) && (
-                                            <span className="ml-2 text-xs font-normal text-neutral-500">({messages.publications.equalContribution})</span>
+                                            <strong className="ml-2 text-xs font-semibold text-primary">({messages.publications.equalContribution})</strong>
                                         )}
                                     </p>
 
