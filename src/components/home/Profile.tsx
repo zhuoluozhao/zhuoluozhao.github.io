@@ -39,6 +39,8 @@ const CsdnIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+const STATS_CACHE_KEY = 'zhuoluozhao-site-stats-cache';
+
 interface ProfileProps {
     author: SiteConfig['author'];
     social: SiteConfig['social'];
@@ -70,10 +72,21 @@ export default function Profile({ author, social, features, researchInterests }:
         }
     }, [features.enable_likes]);
 
-    // Fetch global views & likes from Cloudflare Worker
+    // Fetch global views & likes from counter backend (with instant localStorage cache)
     useEffect(() => {
         const apiBase = features.counter_api?.replace(/\/+$/, '');
         if (!apiBase) return;
+
+        try {
+            const cachedRaw = localStorage.getItem(STATS_CACHE_KEY);
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw) as { views?: number; likes?: number };
+                if (typeof cached.views === 'number') setViews(cached.views);
+                if (typeof cached.likes === 'number') setLikes(cached.likes);
+            }
+        } catch {
+            // Ignore corrupted cache
+        }
 
         let cancelled = false;
         const alreadyViewed = sessionStorage.getItem('zhuoluozhao-site-viewed') === '1';
@@ -88,6 +101,16 @@ export default function Profile({ author, social, features, researchInterests }:
                 if (!cancelled && data) {
                     if (typeof data.views === 'number') setViews(data.views);
                     if (typeof data.likes === 'number') setLikes(data.likes);
+                    if (typeof data.views === 'number' || typeof data.likes === 'number') {
+                        try {
+                            localStorage.setItem(
+                                STATS_CACHE_KEY,
+                                JSON.stringify({ views: data.views, likes: data.likes })
+                            );
+                        } catch {
+                            // Ignore storage quota errors
+                        }
+                    }
                 }
             })
             .catch(() => {
@@ -103,8 +126,19 @@ export default function Profile({ author, social, features, researchInterests }:
         if (isSubmittingLike) return;
 
         const newLikedState = !hasLiked;
+        const nextLikes = likes === null ? null : Math.max(0, likes + (newLikedState ? 1 : -1));
         setHasLiked(newLikedState);
-        setLikes((prev) => (prev === null ? null : Math.max(0, prev + (newLikedState ? 1 : -1))));
+        setLikes(nextLikes);
+        if (nextLikes !== null) {
+            try {
+                localStorage.setItem(
+                    STATS_CACHE_KEY,
+                    JSON.stringify({ views: views ?? undefined, likes: nextLikes })
+                );
+            } catch {
+                // Ignore storage quota errors
+            }
+        }
 
         if (newLikedState) {
             localStorage.setItem('zhuoluozhao-site-liked', 'true');
@@ -129,6 +163,14 @@ export default function Profile({ author, social, features, researchInterests }:
                 const data = (await res.json()) as { views?: number; likes?: number };
                 if (typeof data.views === 'number') setViews(data.views);
                 if (typeof data.likes === 'number') setLikes(data.likes);
+                try {
+                    localStorage.setItem(
+                        STATS_CACHE_KEY,
+                        JSON.stringify({ views: data.views, likes: data.likes })
+                    );
+                } catch {
+                    // Ignore storage quota errors
+                }
             }
         } catch {
             // Keep optimistic state if network fails
