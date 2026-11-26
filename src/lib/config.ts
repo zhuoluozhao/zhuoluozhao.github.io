@@ -31,6 +31,7 @@ export interface SiteConfig {
   features: {
     enable_likes: boolean;
     enable_one_page_mode?: boolean;
+    counter_api?: string;
   };
   navigation: Array<{
     title: string;

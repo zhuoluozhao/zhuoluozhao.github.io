@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { MapPinIcon as MapPinSolidIcon, EnvelopeIcon as EnvelopeSolidIcon } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import { Github, Linkedin, Pin } from 'lucide-react';
+import { Github, Linkedin, Pin, Eye } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useMessages } from '@/lib/i18n/useMessages';
 
@@ -51,6 +51,9 @@ export default function Profile({ author, social, features, researchInterests }:
 
     const [hasLiked, setHasLiked] = useState(false);
     const [showThanks, setShowThanks] = useState(false);
+    const [views, setViews] = useState<number | null>(null);
+    const [likes, setLikes] = useState<number | null>(null);
+    const [isSubmittingLike, setIsSubmittingLike] = useState(false);
     const [showAddress, setShowAddress] = useState(false);
     const [isAddressPinned, setIsAddressPinned] = useState(false);
     const [showEmail, setShowEmail] = useState(false);
@@ -61,23 +64,76 @@ export default function Profile({ author, social, features, researchInterests }:
     useEffect(() => {
         if (!features.enable_likes) return;
 
-        const userHasLiked = localStorage.getItem('jiale-website-user-liked');
+        const userHasLiked = localStorage.getItem('zhuoluozhao-site-liked');
         if (userHasLiked === 'true') {
             setHasLiked(true);
         }
     }, [features.enable_likes]);
 
-    const handleLike = () => {
+    // Fetch global views & likes from Cloudflare Worker
+    useEffect(() => {
+        const apiBase = features.counter_api?.replace(/\/+$/, '');
+        if (!apiBase) return;
+
+        let cancelled = false;
+        const alreadyViewed = sessionStorage.getItem('zhuoluozhao-site-viewed') === '1';
+        if (!alreadyViewed) {
+            sessionStorage.setItem('zhuoluozhao-site-viewed', '1');
+        }
+
+        const endpoint = alreadyViewed ? `${apiBase}/stats` : `${apiBase}/view`;
+        fetch(endpoint, { method: alreadyViewed ? 'GET' : 'POST' })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data: { views?: number; likes?: number } | null) => {
+                if (!cancelled && data) {
+                    if (typeof data.views === 'number') setViews(data.views);
+                    if (typeof data.likes === 'number') setLikes(data.likes);
+                }
+            })
+            .catch(() => {
+                // Keep UI resilient if counter service is unreachable
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [features.counter_api]);
+
+    const handleLike = async () => {
+        if (isSubmittingLike) return;
+
         const newLikedState = !hasLiked;
         setHasLiked(newLikedState);
+        setLikes((prev) => (prev === null ? null : Math.max(0, prev + (newLikedState ? 1 : -1))));
 
         if (newLikedState) {
-            localStorage.setItem('jiale-website-user-liked', 'true');
+            localStorage.setItem('zhuoluozhao-site-liked', 'true');
             setShowThanks(true);
             setTimeout(() => setShowThanks(false), 2000);
         } else {
-            localStorage.removeItem('jiale-website-user-liked');
+            localStorage.removeItem('zhuoluozhao-site-liked');
             setShowThanks(false);
+        }
+
+        const apiBase = features.counter_api?.replace(/\/+$/, '');
+        if (!apiBase) return;
+
+        setIsSubmittingLike(true);
+        try {
+            const res = await fetch(`${apiBase}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: newLikedState ? 'like' : 'unlike' }),
+            });
+            if (res.ok) {
+                const data = (await res.json()) as { views?: number; likes?: number };
+                if (typeof data.views === 'number') setViews(data.views);
+                if (typeof data.likes === 'number') setLikes(data.likes);
+            }
+        } catch {
+            // Keep optimistic state if network fails
+        } finally {
+            setIsSubmittingLike(false);
         }
     };
 
@@ -333,26 +389,40 @@ export default function Profile({ author, social, features, researchInterests }:
                 </div>
             )}
 
-            {/* Like Button */}
-            {features.enable_likes && (
-                <div className="flex justify-center">
-                    <div className="relative">
-                        <motion.button
-                            onClick={handleLike}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${hasLiked
-                                ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
-                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 cursor-pointer'
-                                }`}
+            {/* Like Button & Views */}
+            {(features.enable_likes || features.counter_api) && (
+                <div className="flex items-center justify-center gap-3">
+                    {features.counter_api && (
+                        <div
+                            title={messages.profile.views}
+                            className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-sm"
                         >
-                            {hasLiked ? (
-                                <HeartSolidIcon className="h-4 w-4" />
-                            ) : (
-                                <HeartIcon className="h-4 w-4" />
-                            )}
-                            <span>{hasLiked ? messages.profile.liked : messages.profile.like}</span>
-                        </motion.button>
+                            <Eye className="h-4 w-4" />
+                            <span className="tabular-nums font-medium">{views ?? '—'}</span>
+                        </div>
+                    )}
+                    {features.enable_likes && (
+                        <div className="relative">
+                            <motion.button
+                                onClick={handleLike}
+                                disabled={isSubmittingLike}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${hasLiked
+                                    ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 cursor-pointer'
+                                    }`}
+                            >
+                                {hasLiked ? (
+                                    <HeartSolidIcon className="h-4 w-4" />
+                                ) : (
+                                    <HeartIcon className="h-4 w-4" />
+                                )}
+                                <span>{hasLiked ? messages.profile.liked : messages.profile.like}</span>
+                                {likes !== null && (
+                                    <span className="tabular-nums font-semibold ml-1">{likes}</span>
+                                )}
+                            </motion.button>
 
                         {/* Thanks bubble */}
                         <AnimatePresence>
@@ -369,6 +439,7 @@ export default function Profile({ author, social, features, researchInterests }:
                             )}
                         </AnimatePresence>
                     </div>
+                    )}
                 </div>
             )}
         </motion.div>

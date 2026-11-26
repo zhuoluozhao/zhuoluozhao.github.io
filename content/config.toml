@@ -29,6 +29,8 @@ enable_likes = true
 # Display all subpages on a single page
 enable_one_page_mode = false
 
+counter_api = "https://homepage-counter.zhuoluozhao.workers.dev"
+
 [i18n]
 enabled = true
 locales = ["zh", "en"]
