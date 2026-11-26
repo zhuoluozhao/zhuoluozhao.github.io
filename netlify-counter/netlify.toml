@@ -1,3 +1,16 @@
 [build]
+  command = "echo ok"
   publish = "public"
   edge_functions = "netlify/edge-functions"
+
+[[edge_functions]]
+  function = "counter"
+  path = "/stats"
+
+[[edge_functions]]
+  function = "counter"
+  path = "/view"
+
+[[edge_functions]]
+  function = "counter"
+  path = "/like"
